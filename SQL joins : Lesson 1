@@ -1,0 +1,75 @@
+.sql
+
+Example of JOIN statement:
+
+SELECT orders.*,
+       accounts.*
+FROM orders 
+JOIN accounts
+ON orders.account_id = accounts.id;
+
+/*
+The SELECT clause indicates which column(s) of data you'd like to see in the output (For Example, orders.* gives us 
+all the columns in the orders table in the output). The FROM clause indicates the first table from which we're pulling data, 
+and the JOIN indicates the second table. The ON clause specifies the column on which you'd like to merge the two tables together.  */
+
+EXAMPLE 2:
+
+/*
+SELECT accounts.name, orders.occurred_at
+FROM orders
+JOIN accounts
+ON orders.account_id = accounts.id;
+
+This query only pulls two columns, not all the information in these two tables. 
+Alternatively, the below query pulls all the columns from both the accounts and orders table.
+
+SELECT *
+FROM orders
+JOIN accounts
+ON orders.account_id = accounts.id;
+
+And the first query you ran pull all the information from only the orders table:  */
+
+
+/*
+Try pulling all the data from the accounts table, and all the data from the orders table. Try pulling standard_qty, gloss_qty, 
+and poster_qty from the orders table, and the website and the primary_poc from the accounts table.   */
+
+Solution 1:
+
+SELECT  orders.*, accounts.*    
+FROM accounts
+JOIN orders
+ON accounts.id=orders.account_id
+
+Solution 2:
+
+SELECT accounts.website, accounts.primary_poc, orders.standard_qty, orders.poster_qty
+FROM orders
+JOIN accounts
+ON orders.account_id = accounts.id
+
+
+### ERD  Diagram;
+<Photo stored on Computer>
+
+### JOIN further explaines
+
+Example of Query
+
+SELECT orders.*
+FROM orders
+JOIN accounts
+ON orders.account_id = accounts.id;
+
+Explanation:
+
+Notice our SQL query has the two tables we would like to join - one in the FROM and the other in the JOIN. 
+Then in the ON, we will ALWAYs have the PK equal to the FK:
+
+# Example;
+We want to join the sales_reps and region tables together;
+
+Solution:
+ON region.id = sales_reps.region_id   OR ON sales_rep.region_id = region.id
