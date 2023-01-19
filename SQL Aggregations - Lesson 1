@@ -1,0 +1,113 @@
+.sql
+
+### Null
+
+Example 01;
+
+SELECT *
+FROM accounts
+WHERE primary_poc IS NOT NULL
+
+### Count
+
+Example 01;
+
+SELECT COUNT(*)
+FROM accounts;
+
+
+Example 02;
+SELECT COUNT(accounts.id)
+FROM accounts;
+
+NB: These two examples give equivalent result values.
+
+Example 03;
+
+SELECT COUNT(*) AS order_count
+FROM orders
+WHERE occurred_at >= '2016-12-01'
+AND occurred_at < '2017-01-01'
+
+NB: With an Alias as Order_count ie Name of table with totale number of rows
+
+Example 04;
+
+SELECT COUNT (id) AS account_id_count
+FROM accounts
+
+
+### SUM
+
+Example 01;
+
+SELECT SUM(standard_qty) AS standard,
+       SUM(gloss_qty) AS gloss,
+       SUM(poster_qty) AS poster
+       
+       
+       Exercise 01;
+       
+       Find the total amount of poster_qty paper ordered in the orders table.
+       
+       Solution;
+       SELECT SUM(poster_qty) AS total_poster_sales
+       FROM orders;
+       
+       Find the total amount of standard_qty paper ordered in the orders table.
+       
+       Solution;
+       SELECT SUM(standard_qty) AS total_standard_sales
+       FROM orders;
+       
+       Find the total dollar amount of sales using the total_amt_usd in the orders table.
+       
+       Solution;
+       SELECT SUM(total_amt_usd) AS total_dollar_sales
+       FROM orders;       
+
+       Find the total amount spent on standard_amt_usd and gloss_amt_usd paper for each order in the orders table. 
+       This should give a dollar amount for each order in the table.
+       
+       Solution;
+       SELECT SUM(standard_amt_usd) AS standard
+       SUM(gloss_amt_usd) AS gloss
+       FROM orders;
+       
+       Corrected solution;
+       SELECT standard_amt_usd + gloss_amt_usd AS total_standard_gloss
+       FROM orders;
+       
+       Find the standard_amt_usd per unit of standard_qty paper. Your solution should use both aggregation and a mathematical operator.
+       
+       Solution;
+       SELECT SUM(standard_amt_usd/standard_qty) AS standard          
+       FROM orders;
+
+       Corrected solution;
+       SELECT SUM(standard_amt_usd)/SUM(standard_qty) AS standard_price_per_unit
+       FROM orders;
+       
+       
+### MIN & MAX
+
+Example 01;
+
+SELECT MIN(standard_qty) AS standard_min,
+       MIN(gloss_qty) AS gloss_min,
+       MIN(poster_qty) AS poster_min,
+       MAX(standard_qty) AS standard_max,
+       MAX(gloss_qty) AS gloss_max,
+       MAX(poster_qty) AS poster_max
+FROM   orders
+
+NB: Here we were simultaneously obtaining the MIN and MAX number of orders of each paper type. However, you could run each individually.
+
+### AVERAGE ; AVG
+
+Example 01;
+
+SELECT AVG(standard_qty) AS standard_avg,
+       AVG(gloss_qty) AS gloss_avg,
+       AVG(poster_qty) AS poster_avg
+FROM orders
