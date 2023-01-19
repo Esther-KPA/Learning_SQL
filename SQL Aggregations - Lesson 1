@@ -111,3 +111,12 @@ SELECT AVG(standard_qty) AS standard_avg,
        AVG(gloss_qty) AS gloss_avg,
        AVG(poster_qty) AS poster_avg
 FROM orders
+
+Exercise:
+
+When was the earliest order ever placed? You only need to return the date.
+
+Solution:
+
+SELECT MAX(occurred_at) AS earliest_order_placed
+FROM orders;
