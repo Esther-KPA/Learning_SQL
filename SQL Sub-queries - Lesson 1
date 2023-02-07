@@ -1,0 +1,70 @@
+.sql
+
+### SUB-QUERIES
+
+Example 01:
+
+SELECT product_id,
+       name,
+       price
+FROM db.product
+Where price > (SELECT AVG(price)
+              FROM db.product)
+              
+              
+SET of problem Examples;
+
+  1.  Identify the top-selling Amazon products in months where sales have exceeded $1m
+        Existing Table: Amazon daily sales
+        Subquery Aggregation: Daily to Monthly
+   
+  2. Examine the average price of a brand’s products for the highest-grossing brands
+        Existing Table: Product pricing data across all retailers
+        Subquery Aggregation: Individual to Average
+   
+   3. Order the annual salary of employees that are working less than 150 hours a month
+        Existing Table: Daily time-table of employees
+        Subquery Aggregation: Daily to Monthly
+
+Subquery Placement:
+
+With: This subquery is used when you’d like to “pseudo-create” a table from an existing table and visually scope the temporary 
+table at the top of the larger query.
+Example;
+WITH subquery_name (column_name1, ...) AS
+ (SELECT ...)
+SELECT ...
+
+Nested: This subquery is used when you’d like the temporary table to act as a filter within the larger query, which implies that 
+it often sits within the where clause.
+Example;
+SELECT s.s_id, s.s_name, g.final_grade
+FROM student s, grades g
+WHERE s.s_id = g.s_id
+IN (SELECT final_grade
+    FROM grades g
+    WHERE final_grade >3.7
+   );
+
+Inline: This subquery is used in the same fashion as the WITH use case above. However, instead of the temporary table sitting on 
+top of the larger query, it’s embedded within the from clause.
+Example;
+SELECT student_name
+FROM
+  (SELECT student_id, student_name, grade
+   FROM student
+   WHERE teacher =10)
+WHERE grade >80;
+
+Scalar: This subquery is used when you’d like to generate a scalar value to be used as a benchmark of some sort. 
+Example;
+SELECT s.student_name
+  (SELECT AVG(final_score)
+   FROM grades g
+   WHERE g.student_id = s.student_id) AS
+     avg_score
+FROM student s;
+
+
+Exercise 01:
+
