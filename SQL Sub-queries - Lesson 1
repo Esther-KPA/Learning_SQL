@@ -68,3 +68,76 @@ FROM student s;
 
 Exercise 01:
 
+<please do exercises>
+
+
+
+### Sub-query INDENTATION
+
+Indentation helps simplify readability
+
+Good example:
+SELECT *
+FROM (SELECT DATE_TRUNC('day',occurred_at) AS day,
+                channel, COUNT(*) as events
+      FROM web_events 
+      GROUP BY 1,2
+      ORDER BY 3 DESC) sub
+GROUP BY day, channel, events
+ORDER BY 2 DESC;
+
+Bad example:
+SELECT *
+FROM (
+SELECT DATE_TRUNC('day',occurred_at) AS day,
+channel, COUNT(*) as events
+FROM web_events 
+GROUP BY 1,2
+ORDER BY 3 DESC) sub;
+
+
+### Sub-query VIEWS
+
+Syntax to create a "view"
+
+CREATE VIEW <VIEW_NAME>
+AS
+SELECT …
+FROM …
+WHERE 
+
+Example 1 - Consider the same Parch & Posey database schema again, where the sales_reps table contains details about sales representatives
+and the region table contains the list of regions.
+
+    Suppose you are managing sales representatives who are looking after the accounts in the Northeast region only. The details of such a
+    subset of sales representatives can be fetched from two tables, and stored as a view:
+
+create view v1
+as
+select S.id, S.name as Rep_Name, R.name as Region_Name
+from sales_reps S
+join region R
+on S.region_id = R.id
+and R.name = 'Northeast';
+
+The query above will store the result as a view (virtual table) with the name “V1” that can be queried later.
+
+Example 02 -
+Show the report which channels send the most traffic per day on average to Parch and Posey.
+
+CREATE VIEW V3
+AS
+SELECT channel, AVG(events) AS average_events
+FROM (SELECT DATE_TRUNC('day',occurred_at) AS day,
+                channel, COUNT(*) as events
+         FROM web_events 
+         GROUP BY 1,2) sub
+GROUP BY channel
+
+Now, this view can be queried for any information that it contains. For example, you can see the maximum value of average_events as:
+
+select max(average_events)
+from v3;
+
+NOTE: Most of the databases allow you to alter a view. For example, Oracle and IBM DB2 allows us to alter views and provides CREATE OR REPLACE VIEW
+option to redefine a view.
