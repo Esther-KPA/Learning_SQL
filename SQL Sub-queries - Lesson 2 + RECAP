@@ -1,0 +1,145 @@
+.sql
+
+### Sub-query Trade offs
+
+Readability: How easy it is to determine what the code is doing. Performance: How quickly the code runs. Query Plan: What happens under the hood.
+
+NOTE: Before ever writing a line of code:
+
+    Determine if a subquery is needed (or a join/aggregation function will suffice).
+    If a subquery is needed, determine where you’ll need to place it.
+    Run the subquery as an independent query first: is the output what you expect?
+    Call it something! If you are working with With or Inline subquery, you’ll most certainly need to name it.
+    Run the entire query -- both the inner query and outer query
+
+### Placement WITH
+
+Example 01;
+
+WITH average_price as
+( SELECT brand_id, AVG(product_price) as brand_avg_price
+  FROM product_records
+),
+SELECT a.brand_id, a.total_brand_sales, b.brand_avg_price
+FROM brand_table a
+JOIN average_price b
+ON b.brand_id = a.brand_id
+ORDER BY a.total_brand_sales desc;
+
+WITH : Can also help you add more and more tables in the same way as below;
+
+WITH table1 AS (
+          SELECT *
+          FROM web_events),
+
+     table2 AS (
+          SELECT *
+          FROM accounts)
+
+
+SELECT *
+FROM table1
+JOIN table2
+ON table1.account_id = table2.id;
+
+EXERCISE:
+
+<PLEASE DO EXERCISES>
+
+
+### NESTED Placement
+
+When a user wants to filter an output using a condition met from another table.
+
+Example 01;
+SELECT *
+FROM students
+WHERE student_id
+IN (SELECT DISTINCT student_id
+    FROM gpa_table
+    WHERE gpa>3.5
+    );
+    
+ ### INLINE placement
+ 
+ Inline subqueries create a “pseudo table” that aggregates or manipulates an existing table to be used in a larger query. 
+ 
+ Example 01:
+
+SELECT dept_name,
+       max_gpa
+FROM department_db x
+     (SELECT dept_id
+             MAX(gpa) as max_gpa
+      FROM students
+      GROUP BY dept_id
+      )y
+WHERE x.dept_id = y.dept_id
+ORDER BY dept_name;
+
+Inner query: Pseudo table that aggregates and identifies MAX GPA accross all departments in the students table
+Outer query: Outputs the department name and MAX GPA, the latter of which was determined through the inner query.
+
+### SCALAR Placement:
+It selects only one column or expression and returns one row, used in the select clause of the main query
+
+Example 01;
+
+SELECT 
+   (SELECT MAX(salary) FROM employees_db) AS top_salary,
+   employee_name
+FROM employees_db;
+
+Problem: Return the highest salary and all employee names
+Inner query; Returns a single result that can be used as a part of the larger query. Sits within the SELECT clause.
+Outer query: Leverage the scalar output to be used as a part of the larger query
+Advantage; Performance, good for smaller datasets
+
+
+### RECAP 
+
+Subquery Facts to Know:
+
+    Commonly used as a filter/aggregation tool
+    Commonly used to create a “temporary” view that can be queried off
+    Commonly used to increase readability
+    Can stand independently
+
+
+Key Terms
+KeyTerm 	Definition
+
+Correlated Subquery 	The inner subquery is dependent on the larger query.
+
+CTE 	Common Table Expression in SQL allows you to define a temporary result, such as a table, to then be referenced
+in a later part of the query.
+
+Inline 	This subquery is used in the same fashion as the WITH use case above. However, instead of the temporary table sitting
+on top of the larger query, it’s embedded within the from clause.
+
+Joins Dependencies 	Cannot stand independently.
+
+Joins Output 	A joint view of multiple tables stitched together using a common “key”.
+
+Joins Use Case 	Fully stitch tables together and have full flexibility on what to “select” and “filter from”.
+
+Nested 	This subquery is used when you’d like the temporary table to act as a filter within the larger query, which implies that
+it often sits within the where clause.
+
+Scalar 	This subquery is used when you’d like to generate a scalar value to be used as a benchmark of some sort.
+
+Simple Subquery 	The inner subquery is completely independent of the larger query.
+
+SQL Views 	Virtual tables that are derived from one or more base tables. The term virtual means that the views do not exist physically
+in a database, instead, they reside in the memory (not database), just like the result of any query is stored in the memory.
+
+Subquery 	A SQL query where one SQL query is nested within another query
+
+Subquery Dependencies 	Stand independently and be run as complete queries themselves.
+
+Subquery Output 	Either a scalar (a single value) or rows that have met a condition.
+
+Subquery Use Case 	Calculate a scalar value to use in a later part of the query (e.g., average price as a filter).
+
+With 	This subquery is used when you’d like to “pseudo-create” a table from an existing table and visually scope the temporary table
+at the top of the larger query.
