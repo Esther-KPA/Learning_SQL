@@ -1,0 +1,119 @@
+.sql
+
+### CONCAT 
+
+Adds two or more expressions together
+
+Example: 
+CONCAT(string1, string2, string3)
+
+CONCAT(month, '-', day, '-', year) AS date
+
+
+### CAST
+
+Converts a value of any type into a specific, different data type
+
+CAST(expression AS datatype)
+
+CAST(salary AS int) Note: The salary expression is already made in the LEFT, RIGHT SUBTR functions so it is referred to here again
+and converted to "integer" datatype
+
+### ADVANCED FUNCTIONS
+
+These functions are used to return the position of information and help you work with NULLs.
+
+Position/Strpos: Used to return the position of information to identify where relevant information is held in a string to then extract across all records
+Coalesce: Used to return the first non-null value that’s commonly used for normalizing data that’s stretched across multiple columns and includes NULLs.
+
+### POSITION
+
+Returns the position of the first occurrence of a substring in a string
+
+Example
+
+POSITION(substring IN string)
+
+POSITION("$" IN student_information) as
+salary_starting_position
+
+
+### STRPOS
+
+Converts a value of any type into a specific, different data type
+
+STRPOS(string, substring)
+
+String: entire string
+substring: substring to be extracted
+
+### COALESCE
+
+Returns the first non-null value in a list.
+
+COALESCE(val1, val2, val3)
+
+COALESCE(hourly_wage*40*52, salary, commission*sales) AS annual_income
+
+NOTE: 
+
+COALESCE is a command that helps you deal with null values. Now before using COALESCE, take a step back and think through 
+how’d you like to deal with missing values in the first place.
+
+The three methods below are the most common ways to deal with null values in SQL:
+
+    Coalesce: Allows you to return the first non-null value across a set of columns in a slick, single command. This is a good approach
+    only if a single column’s value needs to be extracted whilst the rest are null.
+    
+    Drop records: Sometimes, if there are null values in records at all, analysts can decide to drop the row entirely. This is not favorable,
+    as it removes data. Data is precious. Think about the reason those values are null. Does it make sense to use COALESCE, drop records, and
+    conduct an imputation.
+    
+    Imputation: Outside of the COALESCE use case, you may want to impute missing values. If so, think about the problem you are trying to solve,
+    and impute accordingly. Perhaps you’d like to be conversative so you take the MIN of that column or the 25th percentile value. Classic 
+    imputation values are often the median or mean value of the column.
+
+EXERCISES:
+
+<PLEASE DO EXERCISES>
+
+
+### RECAP
+
+follow the steps outlined below when starting off with data cleaning in SQL.
+
+    Review the problem statement. (What problem actually needs to be solved)
+    What data do you have? What data do you need? (Data you need - What info you need to solve the problem, what data type it needs to be solve the 
+    problem)
+    How will you adjust existing data or create new columns?
+    Leverage cleaning techniques to manipulate data. (The functions learnt to manipulate the data
+    Leverage analysis techniques to determine the solution. (Methods of analysis learnt: Joins, aggregations, etc)
+
+
+Normalization: Standardizing or “cleaning up a column” by transforming it in some way to make it ready for analysis.
+A few normalization techniques are below:
+
+    Adjusting a column that includes multiple currencies to one common currency
+    Adjusting the varied distribution of a column value by transforming it into a z-score
+    Converting all price into a common metric (e.g., price per ounce)
+    
+
+Methods you learned in Data cleaning;
+
+KeyTerm 	Definition
+
+Cast 	Converts a value of any type into a specific, different data type
+
+Coalesce 	Returns the first non-null value in a list
+
+Concat 	Adds two or more expressions together
+
+Left 	Extracts a number of characters from a string starting from the left
+
+Position 	Returns the position of the first occurrence of a substring in a string
+
+Right 	Extracts a number of characters from a string starting from the right
+
+Strpos 	Returns the position of a substring within a string
+
+Substr 	Extracts a substring from a string (starting at any position)
