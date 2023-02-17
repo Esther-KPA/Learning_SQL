@@ -80,11 +80,75 @@ Resources
 
 This resource from Pinal Dave is helpful.
 
-Exercise:
+Exercise 01:
+Create a running total of standard_amt_usd (in the orders table) over order time with no date truncation.Your final table should have two 
+columns: one with the amount being added for each new row, and a second with the running total.
 
-<Please do exercise>
+Solution:
+SELECT SUM(standard_amt_usd) OVER 
+       (PARTITION BY occurred_at )
+       AS running_total, 
+       occurred_at
+FROM orders
+
+Corrected Solution:
+SELECT standard_amt_usd,
+       SUM(standard_amt_usd) OVER (ORDER BY occurred_at) AS running_total
+
+FROM orders
+
+Exercise 02:
+Now, modify your query from the previous quiz to include partitions. Still create a running total of standard_amt_usd (in the orders table)
+over order time, but this time, date truncate occurred_at by year and partition by that same year-truncated occurred_at variable. 
+
+Solution:
+SELECT standard_amt_usd,
+       DATE_TRUNC('year', occurred_at) as year,
+       SUM(standard_amt_usd) OVER (PARTITION BY DATE_TRUNC('year', occurred_at) ORDER BY occurred_at) AS running_total
+FROM orders
+
+### GROUP BY VS WINDOW FUNCTIONS
+
+Example 01:
+
+SELECT order_id,
+       order_total,
+       order_price,
+       SUM(order_total) OVER
+           (PARTITION BY month(order_date) ORDER BY order_date) AS running_monthly_sales,
+       COUNT(order_id) OVER
+           (PARTITION BY month(order_date) ORDER BY order_date) AS running_monthly orders,
+       AVG(order_price) OVER
+           (PARTITION BY month(order_date) ORDER BY order_date) AS average_monthly_price
+FROM  amazon_sales_db
+WHERE order_date < '2017-01-01';
+
+#### AGGREGATES VS WINDOW FUNCTIONS
+
+Example 01:
+
+SELECT id,
+       account_id,
+       standard_qty,
+       DATE_TRUNC('month', occurred_at) AS month,
+       DENSE_RANK() OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('month', occurred_at)) AS dense_rank,
+       SUM(standard_qty) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('month', occurred_at)) AS sum_standard_qty,
+       COUNT(standard_qty) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('month', occurred_at)) AS count_standard_qty,
+       AVG(standard_qty) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('month', occurred_at)) AS avg_standard_qty,
+       MIN(standard_qty) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('month', occurred_at)) AS min_standard_qty,
+       MAX(standard_qty) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('month', occurred_at)) AS max_standard_qty
+FROM orders
+
+*** What is happening when you omit the ORDER BY clause when doing aggregates with window functions
+
+Removing ORDER BY just leaves an unordered partition; in our query's case, each column's value is simply an aggregation 
+(e.g., sum, count, average, minimum, or maximum) of all the standard_qty values in its respective account_id.
+
+As Stack Overflow user mathguy explains:
+
+    The easiest way to think about this - leaving the ORDER BY out is equivalent to "ordering" in a way that all rows in the partition are
+    "equal" to each other. Indeed, you can get the same effect by explicitly adding the ORDER BY clause like this: ORDER BY 0 (or "order by" 
+    any constant expression), or even, more emphatically, ORDER BY NULL.
 
 
-Study : <PLEASE RE-DO & RE- STUDY>
 
-FROM Windows function level 6 - till end
