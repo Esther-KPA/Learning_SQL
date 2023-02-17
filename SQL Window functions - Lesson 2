@@ -1,0 +1,106 @@
+.sql
+
+### RANKING WINDOW FUNCTIONS
+
+The choice of which ranking function to use is up to the SQL user, often created in conjunction with someone on a customer or business team.
+
+    Row_number(): Ranking is distinct amongst records even with ties in what the table is ranked against.
+    Example:
+    SELECT ROW_NUMBER() OVER(ORDER BY date_time) AS rank,
+       date_time
+FROM   db;
+    
+    Rank(): Ranking is the same amongst tied values and ranks skip for subsequent values.
+    Example:
+    SELECT RANK() OVER(ORDER BY date_time) AS rank,
+       date_time
+FROM   db;
+
+    Dense_rank(): Ranking is the same amongst tied values and ranks do not skip for subsequent values.
+    Example:
+    SELECT DENSE_RANK() OVER(ORDER BY date_time) AS rank,
+       date_time
+FROM   db;
+
+EXERCISE:
+
+Select the id, account_id, and total variable from the orders table, then create a column called total_rank that ranks this total amount of paper ordered
+(from highest to lowest) for each *account* using a partition. Your final table should have these four columns.
+
+SOLUTION:
+SELECT id, account_id, total,
+       DENSE_RANK() OVER (ORDER BY total) AS  
+       total_rank
+FROM orders
+
+Corrected Solution:
+SELECT id,
+       account_id,
+       total,
+       RANK() OVER (PARTITION BY account_id ORDER BY total DESC) AS total_rank
+FROM orders
+
+### WINDOW CLAUSE
+
+USE CASE: If you are planning to write multiple window functions that leverage the same PARTITION BY, OVER, and ORDER BY in a single query, leveraging
+aliases will help tighten your syntax.
+
+EXAMPLE:
+** Instead of repeating "OVER (PARTITION BY month(order_date) ORDER BY order_date) AS running_monthly sales) " for each aggregate we
+can USE the "window function"
+
+SELECT order_id,
+       order_total,
+       order_price,
+       SUM(order_total) OVER monthly_window AS running_monthly_sales,
+       COUNT(order_id) OVER monthly_window AS running_monthly orders,
+       AVG(order_price) OVER monthly_window AS average_monthly_price
+FROM   amazon_sales_db
+WHERE  order_date < '2017-01-01'
+WINDOW monthly_window AS
+       (PARTITION BY month(order_date) ORDER BY order_date);
+       
+       
+** Note 
+Deconstruct the window function alias into its two parts: the alias part and the window function part.
+These are the correct matches.
+
+Alias part
+
+WINDOW main_window AS
+
+Query text
+Window function part
+
+(PARTITION BY account_id ORDER BY DATE_TRUNC('month',occurred_at))
+
+Example:
+
+SELECT id,
+       account_id,
+       DATE_TRUNC('year',occurred_at) AS year,
+       DENSE_RANK() OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('year',occurred_at)) AS dense_rank,
+       total_amt_usd,
+       SUM(total_amt_usd) OVER account_year_window AS sum_total_amt_usd,
+       COUNT(total_amt_usd) OVER account_year_window AS count_total_amt_usd,
+       AVG(total_amt_usd) OVER account_year_window AS avg_total_amt_usd,
+       MIN(total_amt_usd) OVER account_year_window AS min_total_amt_usd,
+       MAX(total_amt_usd) OVER account_year_window AS max_total_amt_usd
+FROM orders
+WINDOW account_year_window AS
+       (PARTITION BY account_id ORDER BY DATE_TRUNC('year',occurred_at);  
+
+CORRECTED SOLUTION:
+SELECT id,
+       account_id,
+       DATE_TRUNC('year',occurred_at) AS year,
+       DENSE_RANK() OVER account_year_window AS dense_rank,
+       total_amt_usd,
+       SUM(total_amt_usd) OVER account_year_window AS sum_total_amt_usd,
+       COUNT(total_amt_usd) OVER account_year_window AS count_total_amt_usd,
+       AVG(total_amt_usd) OVER account_year_window AS avg_total_amt_usd,
+       MIN(total_amt_usd) OVER account_year_window AS min_total_amt_usd,
+       MAX(total_amt_usd) OVER account_year_window AS max_total_amt_usd
+FROM orders 
+WINDOW account_year_window AS (PARTITION BY account_id ORDER BY DATE_TRUNC('year',occurred_at))
+
