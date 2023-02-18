@@ -1,0 +1,284 @@
+.sql
+
+#### LAG 
+** Compares row to previous row
+
+Example;
+
+1. Start with inner query;
+SELECT     account_id, SUM(standard_qty) AS standard_sum
+FROM       orders
+GROUP BY   1
+
+2. Create outer query and name inner query - sub
+SELECT account_id, standard_sum   
+FROM   (
+        SELECT   account_id, SUM(standard_qty) AS standard_sum
+        FROM     orders
+        GROUP BY 1
+       ) sub
+       
+3. Add the Window Function OVER (ORDER BY standard_sum) in the outer query that will create a result set in ascending order based on the standard_sum
+column.
+SELECT account_id, 
+       standard_sum,
+       LAG(standard_sum) OVER (ORDER BY standard_sum) AS lag
+FROM   (
+        SELECT   account_id, SUM(standard_qty) AS standard_sum
+        FROM     orders
+        GROUP BY 1
+       ) sub
+
+4. LAG function creates a new column called lag as part of the outer query: LAG(standard_sum) OVER (ORDER BY standard_sum) AS lag. This new column named
+lag uses the values from the ordered standard_sum (Part A within Step 3).
+SELECT account_id,
+       standard_sum,
+       LAG(standard_sum) OVER (ORDER BY standard_sum) AS lag
+FROM   (
+        SELECT   account_id,
+                 SUM(standard_qty) AS standard_sum
+        FROM     orders
+        GROUP BY 1
+       ) sub
+       
+SELECT account_id,
+       standard_sum,
+       LAG(standard_sum) OVER (ORDER BY standard_sum) AS lag
+FROM   (
+        SELECT   account_id,
+                 SUM(standard_qty) AS standard_sum
+        FROM     orders
+        GROUP BY 1
+       ) sub
+
+Each row’s value in lag is pulled from the previous row. E.g., for account_id 1901, the value in lag will come from the previous row. However, 
+since there is no previous row to pull from, the value in lag for account_id 1901 will be NULL. For account_id 3371, the value in lag will be pulled
+from the previous row (i.e., account_id 1901), which will be 0. This goes on for each row in the table.
+
+
+### LAG_DIFFERENCE
+lag_difference, which subtracts the lag value from the value in standard_sum for each row in the table:
+
+standard_sum - LAG(standard_sum) OVER (ORDER BY standard_sum) AS lag_difference
+
+SELECT account_id,
+       standard_sum,
+       LAG(standard_sum) OVER (ORDER BY standard_sum) AS lag,
+       standard_sum - LAG(standard_sum) OVER (ORDER BY standard_sum) AS lag_difference
+FROM (
+       SELECT account_id,
+       SUM(standard_qty) AS standard_sum
+       FROM orders 
+       GROUP BY 1
+      ) sub
+### LEAD
+
+Return the value from the row following the current row in the table.
+
+1. Star with inner query
+
+SELECT     account_id,
+           SUM(standard_qty) AS standard_sum
+FROM       orders
+GROUP BY   1
+
+2. Create the outer query, and name the inner query as sub.
+
+SELECT account_id,
+       standard_sum   
+FROM   (
+        SELECT   account_id,
+                 SUM(standard_qty) AS standard_sum
+        FROM     orders
+        GROUP BY 1
+       ) sub
+       
+3. Add the Window Function (OVER BY standard_sum) in the outer query that will create a result set ordered in ascending order of the
+standard_sum column.
+
+SELECT account_id,
+       standard_sum,
+       LEAD(standard_sum) OVER (ORDER BY standard_sum) AS lead
+FROM   (
+        SELECT   account_id,
+                 SUM(standard_qty) AS standard_sum
+        FROM     orders
+        GROUP BY 1
+       ) sub
+       
+4. LEAD function in the Window Function statement creates a new column called lead as part of the outer query: 
+
+LEAD(standard_sum) OVER (ORDER BY standard_sum) AS lead
+
+SELECT account_id,
+       standard_sum,
+       LEAD(standard_sum) OVER (ORDER BY standard_sum) AS lead
+FROM   (
+        SELECT   account_id,
+                 SUM(standard_qty) AS standard_sum
+        FROM     orders
+        GROUP BY 1
+       ) sub
+### LEAD DIFFERENCE
+
+LEAD(standard_sum) OVER (ORDER BY standard_sum) - standard_sum AS lead_difference
+
+SELECT account_id,
+       standard_sum,
+       LEAD(standard_sum) OVER (ORDER BY standard_sum) AS lead,
+       LEAD(standard_sum) OVER (ORDER BY standard_sum) - standard_sum AS lead_difference
+FROM (
+SELECT account_id,
+       SUM(standard_qty) AS standard_sum
+       FROM orders 
+       GROUP BY 1
+     ) sub
+
+#### USE CASE
+
+You can use LAG and LEAD functions whenever you are trying to compare the values in adjacent rows or rows that are offset by a certain number.
+
+Example 1: You have a sales dataset with the following data and need to compare how the market segments fare against each other on profits earned.
+Market Segment 	Profits earned by each market segment
+A 	$550
+B 	$500
+C 	$670
+D 	$730
+E 	$982
+
+Example 2: You have an inventory dataset with the following data and need to compare the number of days elapsed between each subsequent order placed
+for Item A.
+Inventory 	Order_id 	Dates when orders were placed
+Item A 	001 	11/2/2017
+Item A 	002 	11/5/2017
+Item A 	003 	11/8/2017
+Item A 	004 	11/15/2017
+Item A 	005 	11/28/2017
+
+As you can see, these are useful data analysis tools that you can use for more complex analysis!
+
+EXERCISE:
+
+ Imagine you're an analyst at Parch & Posey and you want to determine how the current order's total revenue ("total" meaning from sales of
+ all types of paper) compares to the next order's total revenue. You'll need to use occurred_at and total_amt_usd in the orders table along
+ with LEAD to do so. In your query results, there should be four columns: occurred_at, total_amt_usd, lead, and lead_difference.
+ 
+ Solution:
+ SELECT account_id,
+       standard_sum,
+       LEAD(standard_sum) OVER (ORDER BY standard_sum) AS lead,
+       LEAD(standard_sum) OVER (ORDER BY standard_sum) - standard_sum AS lead_difference
+FROM (
+SELECT account_id,
+      * SUM(standard_qty) AS standard_sum *
+  FROM orders 
+ GROUP BY 1
+ ) sub
+
+Corrected solution:
+SELECT * occurred_at, *
+       * total_amt_usd, *
+       LEAD(* total_amt_usd) OVER (ORDER BY occurred_at) AS lead,
+       LEAD(* total_amt_usd) OVER (ORDER BY occurred_at) - total_amt_usd AS lead_difference
+FROM (
+SELECT occurred_at,
+       SUM(total_amt_usd) AS total_amt_usd
+  FROM orders 
+ GROUP BY 1
+) sub
+
+### PERCENTILES
+
+**  Percentiles help better describe large datasets.
+
+Percentiles Syntax
+
+The following components are important to consider when building a query with percentiles:
+
+    NTILE + the number of buckets you’d like to create within a column (e.g., 100 buckets would create traditional percentiles,
+    4 buckets would create quartiles, etc.)
+    OVER
+    ORDER BY (optional, typically a date column)
+    AS + the new column name
+
+In other words, when you use an NTILE function but the number of rows in the partition is less than the NTILE(number of groups), 
+then NTILE will divide the rows into as many groups as there are members (rows) in the set but then stop short of the requested number
+of groups. If you’re working with very small windows, keep this in mind and consider using quartiles or similarly small bands.
+
+** NTILE(# of buckets) OVER (ORDER BY ranking_column) AS new_column_name
+
+Example:
+SELECT  customer_id,
+        composite_score,
+        NTILE(100) OVER(ORDER BY composite_score) AS percentile
+FROM    customer_lead_score;
+
+Exercise 01:
+Use the NTILE functionality to divide the accounts into 4 levels in terms of the amount of standard_qty for their orders. Your resulting 
+table should have the account_id, the occurred_at time for each order, the total amount of standard_qty paper purchased, and one of four 
+levels in a standard_quartile column.
+
+Solution:
+SELECT account_id, 
+       occurred_at, 
+       SUM(standard_qty),
+       NTILE(4) OVER(ORDER BY standard_qty) AS standard_quartile
+FROM orders
+
+Corrected Solution:
+SELECT
+       account_id,
+       occurred_at,
+       standard_qty,
+       NTILE(4) OVER (PARTITION BY account_id ORDER BY standard_qty) AS standard_quartile
+  FROM orders 
+ ORDER BY account_id DESC
+ 
+Exercise 02;
+Use the NTILE functionality to divide the accounts into two levels in terms of the amount of gloss_qty for their orders. Your resulting 
+table should have the account_id, the occurred_at time for each order, the total amount of gloss_qty paper purchased, and one of two levels
+in a gloss_half column.
+
+Solution:
+SELECT account_id, occurred_at, SUM(gloss_qty),
+NTILE(2) OVER(ORDER BY account_id) AS gloss_half
+FROM orders;
+
+Corrected Solution:
+SELECT
+       account_id,
+       occurred_at,
+       gloss_qty,
+       NTILE(2) OVER (PARTITION BY account_id ORDER BY gloss_qty) AS gloss_half
+  FROM orders 
+ ORDER BY account_id DESC
+
+Exercise 03:
+Use the NTILE functionality to divide the orders for each account into 100 levels in terms of the amount of total_amt_usd for their orders.
+Your resulting table should have the account_id, the occurred_at time for each order, the total amount of total_amt_usd paper purchased, and 
+one of 100 levels in a total_percentile column.
+
+Solution
+SELECT account_id, occurred_at, total_amt_usd,
+NTILE(100) OVER(ORDER BY account_id) AS total_percentile
+FROM orders;
+
+
+Corrected Solution:
+SELECT
+       account_id,
+       occurred_at,
+       total_amt_usd,
+       NTILE(100) OVER (PARTITION BY account_id ORDER BY total_amt_usd) AS total_percentile
+  FROM orders 
+ ORDER BY account_id DESC
+
+*** NOTE:
+
+    Window functions are similar to aggregate/group by functions.
+    Window functions maintain the total number of rows from the original dataset.
+    Window functions are typically used in the following ways:
+    Measure and/or track changes over time.
+    Rank a column to be used for outreach and/or prioritization.
+    If you are planning to write multiple window functions that leverage the same PARTITION BY, OVER, and ORDER BY in a single query,
+    leveraging aliases will help tighten your syntax.
