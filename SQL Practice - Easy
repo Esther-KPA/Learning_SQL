@@ -52,3 +52,23 @@ duplicates from the answer.
  
  *** Using DISTINCT because it is used to return only distinct (different) values. MOD() function also returns the remainder of a 
  number divided by another number - So the id number divided by 2 equalling to zero returns an even number 
+
+8. Query the two cities in STATION with the shortest and longest CITY names, as well as their respective lengths (i.e.: number of characters in the name).
+If there is more than one smallest or largest city, choose the one that comes first when ordered alphabetically. 
+
+When ordered alphabetically, the CITY names are listed as ABC, DEF, PQRS, and WXY, with the respective lengths 3, 3, 4 and 3. The longest-named city is obviously PQRS, but there are 3 options for shortest-named city; we choose ABC, because it comes first alphabetically.
+
+SELECT * FROM (SELECT DISTINCT city, LENGTH(city) FROM station ORDER BY LENGTH(city) ASC, city ASC) WHERE ROWNUM = 1   
+UNION  
+SELECT * FROM (SELECT DISTINCT city, LENGTH(city) FROM station ORDER BY LENGTH(city) DESC, city ASC) WHERE ROWNUM = 1; 
+
+9. Query the list of CITY names starting with vowels (i.e., a, e, i, o, or u) from STATION. Your result cannot contain duplicates.
+
+SELECT DISTINCT
+CITY 
+FROM STATION 
+WHERE lower(substr(CITY,1,1)) in ('a','e','i','o','u') ;
+
+10. Query the list of CITY names ending with vowels (a, e, i, o, u) from STATION. Your result cannot contain duplicates.
+
+
